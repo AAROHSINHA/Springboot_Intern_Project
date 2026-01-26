@@ -14,8 +14,7 @@ import java.time.Instant;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @Column(nullable = false)
     private String email;
@@ -26,7 +25,7 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    // JPA needs this
+
     protected User() {}
 
     public User(String email, String password) {
@@ -35,8 +34,8 @@ public class User {
         this.createdAt = Instant.now();
     }
 
-    // getters only (no setters for security)
-    public Long getId() { return id; }
+
+    public String getId() { return id; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public Instant getCreatedAt() { return createdAt; }
