@@ -1,11 +1,16 @@
 package com.example.demo.services;
 
+import com.example.demo.dto.CourseDetailDTO;
+import com.example.demo.dto.CourseSummaryDTO;
+import com.example.demo.dto.SubtopicDTO;
+import com.example.demo.dto.TopicDTO;
 import com.example.demo.entities.Course;
 import com.example.demo.entities.Topic;
 import com.example.demo.entities.Subtopic;
 import com.example.demo.repositories.CourseRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.demo.dto.*;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -14,7 +19,9 @@ import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CourseService {
@@ -27,6 +34,7 @@ public class CourseService {
         this.objectMapper = objectMapper;
     }
 
+    // seed data run on startup
     @Transactional
     public void seedCoursesIfEmpty() {
         // if database has no courses means bring in courses from the json
@@ -45,7 +53,7 @@ public class CourseService {
                 courseNode.get("description").asText()
             );
 
-            List<Topic> topics = new ArrayList<>();
+            Set<Topic> topics = new HashSet<>();
 
             for (var topicNode : courseNode.get("topics")) {
 
@@ -55,7 +63,7 @@ public class CourseService {
                     course
                 );
 
-                List<Subtopic> subtopics = new ArrayList<>();
+                Set<Subtopic> subtopics = new HashSet<>();
 
                 for (var subNode : topicNode.get("subtopics")) {
 
@@ -84,6 +92,7 @@ public class CourseService {
         }
     }
 
+    // get only course info
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -91,4 +100,59 @@ public class CourseService {
     public Course getCourseById(String id) {
         return courseRepository.findById(id).orElse(null);
     }
+
+    // get all course 
+     public List<CourseSummaryDTO> getCourseSummaries() {
+
+        List<Object[]> rows = courseRepository.fetchCourseSummaries();
+        List<CourseSummaryDTO> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            result.add(new CourseSummaryDTO(
+                (String) row[0],
+                (String) row[1],
+                (String) row[2],
+                ((Number) row[3]).longValue(),
+                ((Number) row[4]).longValue()
+            ));
+        }
+
+        return result;
+    }
+    
+    // Get course by id
+    
+public CourseDetailDTO getCourseDetailsById(String id) {
+
+    Course course = courseRepository.findCourseWithDetails(id);
+    if (course == null) return null;
+
+    List<TopicDTO> topicDTOs = new ArrayList<>();
+
+    for (Topic topic : course.getTopics()) {
+
+        List<SubtopicDTO> subtopicDTOs = new ArrayList<>();
+
+        for (Subtopic sub : topic.getSubtopics()) {
+            subtopicDTOs.add(new SubtopicDTO(
+                sub.getId(),
+                sub.getTitle(),
+                sub.getContentMarkdown()
+            ));
+        }
+
+        topicDTOs.add(new TopicDTO(
+            topic.getId(),
+            topic.getTitle(),
+            subtopicDTOs
+        ));
+    }
+
+    return new CourseDetailDTO(
+        course.getId(),
+        course.getTitle(),
+        course.getDescription(),
+        topicDTOs
+    );
+}
 }

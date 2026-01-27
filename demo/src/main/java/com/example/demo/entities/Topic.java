@@ -2,6 +2,7 @@ package com.example.demo.entities;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "topics")
@@ -19,8 +20,14 @@ public class Topic {
     private Course course;
 
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subtopic> subtopics;
+@OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<Subtopic> subtopics;
+
+
+public Set<Subtopic> getSubtopics() {
+    return subtopics;
+}
+
 
     protected Topic() {}
 
@@ -29,7 +36,7 @@ public class Topic {
         this.title = title;
         this.course = course;
     }
-    public void setSubtopics(List<Subtopic> subtopics) {
+    public void setSubtopics(Set<Subtopic> subtopics) {
     this.subtopics = subtopics;
 }
 
