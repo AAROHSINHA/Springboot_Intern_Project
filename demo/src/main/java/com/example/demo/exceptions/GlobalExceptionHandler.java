@@ -37,4 +37,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleGeneralError(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error", "An unexpected error occurred");
     }
+
+
+
+@ExceptionHandler(AlreadyEnrolledException.class)
+public ResponseEntity<Object> handleAlreadyEnrolled(AlreadyEnrolledException ex) {
+    return buildResponse(
+        HttpStatus.CONFLICT,
+        "Already enrolled",
+        ex.getMessage()
+    );
+}
+@ExceptionHandler(CourseNotFoundException.class)
+public ResponseEntity<Object> handleCourseNotFound(CourseNotFoundException ex) {
+    return buildResponse(
+        HttpStatus.NOT_FOUND,
+        "Course not found",
+        ex.getMessage()
+    );
+}
 }
