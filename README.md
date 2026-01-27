@@ -39,4 +39,24 @@ Firstly, I created the entities in the folder src/main/java/com/example/demo/ent
     }
   ]
 }
+```
 
+> ### 3. Authentication
+1. First I implemented a simple register api. Simply for user to create an account. User simply needs to add his email and password. We check if that email already exists. If not, we create the account. If user exists we provide 409 status code and error as -
+```
+{
+  "timestamp": "2026-01-27T17:16:31.835682200Z",
+  "error": "Conflict",
+  "message": "User with email 'aarohsinha.programming@gmail.com' already exists"
+}
+```
+Now for registering, I simply have the user service in the codebase. There we first hash the password using `bcrypt`. It was not mentioned in the assignment whether we need to hash or not, but hashing is the most basic security step in any project, so I also added it here. After this the user is registered and the database is updated!
+
+2. For login, what we do is simply take in user email and password, and check if it matches. it it does, we return a response as -
+```
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "email": "student@example.com",
+  "expiresIn": 86400
+}
+```
