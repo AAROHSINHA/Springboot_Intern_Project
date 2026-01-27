@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
+import io.jsonwebtoken.Claims;
 
 @Component
 public class JwtUtil {
@@ -22,5 +23,25 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
                 .compact();
+    }   
+
+    // what this does is checks if user token is valid. means logged in or not
+    public boolean isTokenValid(String token) {
+    try {
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return true;
+    } catch (Exception e) {
+        return false;
     }
+}
+
+ // what this does is takes the token as input and returns the user email
+    public String extractEmail(String token) {
+    return Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .getSubject();
+}
 }

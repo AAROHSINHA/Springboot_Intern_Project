@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HelloController {
     @GetMapping("/hello")
     public String sayHello(){
-        return "Hellosss From Aarohhhh Sinhaaaasasasa";
+        return "Hello From Aaroh Sinha";
     }
 }
