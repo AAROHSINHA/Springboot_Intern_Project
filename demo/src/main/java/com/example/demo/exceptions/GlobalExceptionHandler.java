@@ -20,19 +20,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, status);
     }
 
-    // Catch our custom "UserAlreadyExists" error -> Return 409 Conflict
+    // Catch  "UserAlreadyExists" = 409 Conflict
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Object> handleUserExists(UserAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
     }
 
-    // Catch generic errors (like missing fields) -> Return 400 Bad Request
+    // Catch generic errors (like missing fields) = 400 Bad Request
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleBadRequest(IllegalArgumentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
     }
 
-    // Catch everything else -> Return 500 Internal Server Error
+    // Catch everything else =  500 Internal Server Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralError(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error", "An unexpected error occurred");

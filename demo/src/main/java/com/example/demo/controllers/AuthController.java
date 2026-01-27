@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 record RegisterRequest(String email, String password) {}
-
+record AuthRequest(String email, String password) {}
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -21,14 +21,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        // We just call the service. If it fails, GlobalExceptionHandler takes over.
         User user = authService.registerUser(request.email(), request.password());
 
-        // Return 201 Created as per requirements
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
             "message", "User registered successfully"
         ));
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authService.loginUser(request.email(), request.password()));
     }
 }

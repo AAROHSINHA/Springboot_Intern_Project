@@ -8,20 +8,18 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-
-    // This makes the 'BCryptPasswordEncoder' available to your AuthService
+    // This security config is used for bcrypt. this makes bcrypt easily integrable into any other service we create!
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // This tells Spring: "Let everyone access my APIs for now"
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Required for POST requests like Register
+            .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Keeps Search and Register open for testing
+                .anyRequest().permitAll() 
             );
         return http.build();
     }
