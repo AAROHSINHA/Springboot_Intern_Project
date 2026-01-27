@@ -16,16 +16,27 @@ Firstly, I created the entities in the folder src/main/java/com/example/demo/ent
     save course (cascade saves everything)
 
 > ### 2. Search Functionality
-1. Before implementing fuzzy search, ranking/scoring or any other advanced methods, I decided to implement basic searching. We can say it baseline or v1 of searching logic. What we do is user enters a keyword. For example `velo`, we search course name -> course description -> topic name -> subtopics -> subtopic name -> subtopic markdown. We return the course if we find the keyword at any step. This is the most basic searching logic, is case-insensitive and allows partial matching. We use this sql logic -
+1.For the search feature, I implemented the basic logic as described in the assignment. When a user enters a keyword, we simply check the course title, course description, topic titles, subtopic titles, and the subtopic content for matches. The search is case-insensitive and allows partial matches. Whenever a match is found, the course is returned along with its topics and subtopics, so the user can see where the keyword appeared. This is just the straightforward, baseline version of the search — no ranking or fuzzy matching has been added yet. example return json -
 
 ```
-SELECT c.*
-FROM courses c
-LEFT JOIN topics t ON t.course_id = c.id
-LEFT JOIN subtopics s ON s.topic_id = t.id
-WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%'))
-   OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%'))
-   OR LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%'))
-   OR LOWER(s.title) LIKE LOWER(CONCAT('%', :query, '%'))
-   OR LOWER(s.content_markdown) LIKE LOWER(CONCAT('%', :query, '%'))
-GROUP BY c.id
+{
+  "courseId": "...",
+  "courseTitle": "...",
+  "matches": [
+    {
+      "type": "subtopic",
+      "topicTitle": "...",
+      "subtopicId": "...",
+      "subtopicTitle": "...",
+      "snippet": "..."
+    },
+    {
+      "type": "content",
+      "topicTitle": "...",
+      "subtopicId": "...",
+      "subtopicTitle": "...",
+      "snippet": "..."
+    }
+  ]
+}
+
