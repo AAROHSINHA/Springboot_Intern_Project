@@ -12,4 +12,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     // Checks if an enrollment already exists for this user + course
     // Used to prevent duplicate enrollments
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
+
+    // Used to verify enrollment
+    boolean existsByUserAndCourse(User user, Course course);
 }

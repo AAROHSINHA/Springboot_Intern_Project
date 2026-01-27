@@ -33,5 +33,8 @@ public class Subtopic {
     public String getTitle() { return title; }
     public String getContentMarkdown() { return contentMarkdown; }
 
+public Topic getTopic() {
+    return topic;
+}
 
 }

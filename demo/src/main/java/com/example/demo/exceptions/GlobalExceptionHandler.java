@@ -56,4 +56,20 @@ public ResponseEntity<Object> handleCourseNotFound(CourseNotFoundException ex) {
         ex.getMessage()
     );
 }
+@ExceptionHandler(SubtopicNotFoundException.class)
+    public ResponseEntity<Object> handleSubtopicNotFound(SubtopicNotFoundException ex) {
+        return buildResponse(
+            HttpStatus.NOT_FOUND, 
+            "Subtopic Not Found", 
+            ex.getMessage()
+        );
+    }
+    @ExceptionHandler(NotEnrolledException.class)
+    public ResponseEntity<Object> handleNotEnrolled(NotEnrolledException ex) {
+        return buildResponse(
+            HttpStatus.FORBIDDEN, 
+            "Access Denied", 
+            ex.getMessage()
+        );
+    }
 }
