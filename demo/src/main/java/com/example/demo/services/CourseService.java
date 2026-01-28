@@ -8,14 +8,10 @@ import com.example.demo.entities.Course;
 import com.example.demo.entities.Topic;
 import com.example.demo.entities.Subtopic;
 import com.example.demo.repositories.CourseRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.example.demo.dto.*;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
 import java.util.ArrayList;

@@ -27,20 +27,16 @@ public class EnrollmentController {
     @PostMapping("/{courseId}/enroll")
     public Map<String, Object> enroll(
             @PathVariable String courseId,
-            Authentication authentication // Provided by Spring Security
+            Authentication authentication 
     ) {
 
-        // 1. Extract logged-in user's email from JWT
         String email = authentication.getName();
 
-        // 2. Load User entity
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 3. Call service
         Enrollment enrollment = enrollmentService.enroll(user, courseId);
 
-        // 4. Build response (don’t expose entities directly)
         return Map.of(
                 "enrollmentId", enrollment.getId(),
                 "courseId", enrollment.getCourse().getId(),

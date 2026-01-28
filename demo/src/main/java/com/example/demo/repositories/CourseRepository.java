@@ -10,19 +10,23 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, String> {
       // search across course, topic, subtopic fields
-       @Query(value = """
-        SELECT c.*
-        FROM courses c
-        LEFT JOIN topics t ON t.course_id = c.id
-        LEFT JOIN subtopics s ON s.topic_id = t.id
-        WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(s.title) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(s.content_markdown) LIKE LOWER(CONCAT('%', :query, '%'))
-        GROUP BY c.id
-        """, nativeQuery = true)
-    List<Course> searchCourses(@Param("query") String query);
+  @Query(value = """
+    SELECT DISTINCT c.*
+    FROM courses c
+    LEFT JOIN topics t ON t.course_id = c.id
+    LEFT JOIN subtopics s ON s.topic_id = t.id
+    WHERE EXISTS (
+        SELECT 1
+        FROM unnest(string_to_array(:query, ' ')) AS q
+        WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', q, '%'))
+           OR LOWER(c.description) LIKE LOWER(CONCAT('%', q, '%'))
+           OR LOWER(t.title) LIKE LOWER(CONCAT('%', q, '%'))
+           OR LOWER(s.title) LIKE LOWER(CONCAT('%', q, '%'))
+           OR LOWER(s.content_markdown) LIKE LOWER(CONCAT('%', q, '%'))
+    )
+    """, nativeQuery = true)
+List<Course> searchCourses(@Param("query") String query);
+
 
     
 

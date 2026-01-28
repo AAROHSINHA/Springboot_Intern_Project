@@ -22,4 +22,6 @@ public interface SubtopicProgressRepository extends JpaRepository<SubtopicProgre
         @Param("userId") String userId,
         @Param("courseId") String courseId
     );
+
+    
 }

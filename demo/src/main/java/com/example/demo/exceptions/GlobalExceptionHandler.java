@@ -81,5 +81,32 @@ public ResponseEntity<Object> handleUnauthorizedAccess(UnauthorizedAccessExcepti
         ex.getMessage()
     );
 }
+@ExceptionHandler(InvalidCredentialsException.class)
+public ResponseEntity<Object> handleInvalidCredentials(InvalidCredentialsException ex) {
+    return buildResponse(
+        HttpStatus.UNAUTHORIZED,
+        "Unauthorized",
+        ex.getMessage()
+    );
+}
+
+@ExceptionHandler(InvalidInputException.class)
+public ResponseEntity<Object> handleInvalidInput(InvalidInputException ex) {
+    return buildResponse(
+        HttpStatus.BAD_REQUEST,
+        "Bad Request",
+        ex.getMessage()
+    );
+}
+
+@ExceptionHandler(AuthInternalException.class)
+public ResponseEntity<Object> handleAuthInternal(AuthInternalException ex) {
+    return buildResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Server Error",
+        ex.getMessage()
+    );
+}
+
 
 }

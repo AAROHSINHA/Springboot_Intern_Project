@@ -8,29 +8,42 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 @Repository
 public interface SubtopicRepository extends JpaRepository<Subtopic, String> {
-
-    @Query(value = """
+@Query(value = """
         SELECT 
             c.id as courseId, 
             c.title as courseTitle, 
             t.title as topicTitle, 
             s.id as subtopicId, 
             s.title as subtopicTitle,
-            -- This generates the 'snippet' and wraps the match in <b> tags
-            ts_headline('english', s.content_markdown, plainto_tsquery('english', :query), 
-                'StartSel=<b>, StopSel=</b>, MaxWords=30, MinWords=15') as snippet,
-            -- Logic to determine if the match was in the title or the content
+            
+            -- 1. MATCH TYPE DETERMINATION
             CASE 
-                WHEN to_tsvector('english', s.title) @@ plainto_tsquery('english', :query) THEN 'subtopic'
-                ELSE 'content'
-            END as matchType
+                WHEN s.title ILIKE CONCAT('%', :query, '%') THEN 'subtopic'
+                WHEN s.content_markdown ILIKE CONCAT('%', :query, '%') THEN 'content'
+                ELSE 'reference' 
+            END as matchType,
+
+            -- 2. SNIPPET GENERATION
+            CASE 
+                WHEN s.content_markdown ILIKE CONCAT('%', :query, '%') THEN 
+                    CONCAT('...', SUBSTRING(
+                        s.content_markdown, 
+                        GREATEST(1, POSITION(LOWER(:query) IN LOWER(s.content_markdown)) - 20), 
+                        100
+                    ), '...')
+                ELSE 
+                    -- Fixed: Changed s.description to c.description
+                    CONCAT(LEFT(c.description, 100), '...')
+            END as snippet
+
         FROM subtopics s
         JOIN topics t ON s.topic_id = t.id
         JOIN courses c ON t.course_id = c.id
         WHERE 
-            to_tsvector('english', s.title || ' ' || s.content_markdown) @@ plainto_tsquery('english', :query)
-            OR to_tsvector('english', t.title) @@ plainto_tsquery('english', :query)
-            OR to_tsvector('english', c.title) @@ plainto_tsquery('english', :query)
+            s.title ILIKE CONCAT('%', :query, '%')
+            OR s.content_markdown ILIKE CONCAT('%', :query, '%')
+            OR t.title ILIKE CONCAT('%', :query, '%')
+            OR c.title ILIKE CONCAT('%', :query, '%')
     """, nativeQuery = true)
     List<SearchProjection> performFullTextSearch(@Param("query") String query);
 
@@ -40,10 +53,9 @@ public interface SubtopicRepository extends JpaRepository<Subtopic, String> {
         String getTopicTitle();
         String getSubtopicId();
         String getSubtopicTitle();
-        String getSnippet();
         String getMatchType();
+        String getSnippet();
     }
-
     @Query("""
         SELECT COUNT(s)
         FROM Subtopic s

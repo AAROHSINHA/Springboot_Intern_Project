@@ -2,9 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.repositories.SubtopicRepository;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,35 +16,54 @@ public class SearchService {
     }
 
     public Map<String, Object> search(String query) {
-        List<SubtopicRepository.SearchProjection> flatResults = subtopicRepository.performFullTextSearch(query);
+        if (query == null || query.trim().isEmpty()) {
+            return Map.of("query", "", "results", List.of());
+        }
 
-        List<Map<String, Object>> results = flatResults.stream()
+        // 1. Get flat data from DB (Projected Interface)
+        List<SubtopicRepository.SearchProjection> flatResults = subtopicRepository.performFullTextSearch(query.trim());
+
+        // 2. Group by Course ID to create the nested structure
+        List<Map<String, Object>> groupedResults = flatResults.stream()
             .collect(Collectors.groupingBy(
                 SubtopicRepository.SearchProjection::getCourseId,
-                LinkedHashMap::new,
+                LinkedHashMap::new, // Keep insertion order
                 Collectors.toList()
             ))
             .entrySet().stream()
             .map(entry -> {
-                var matches = entry.getValue();
-                var first = matches.get(0);
-                
-                return Map.of(
-                    "courseId", entry.getKey(),
-                    "courseTitle", first.getCourseTitle(),
-                    "matches", matches.stream().map(m -> Map.of(
-                        "type", m.getMatchType(),
-                        "topicTitle", m.getTopicTitle(),
-                        "subtopicId", m.getSubtopicId(),
-                        "subtopicTitle", m.getSubtopicTitle(),
-                        "snippet", m.getSnippet() != null ? m.getSnippet() : ""
-                    )).toList()
-                );
-            }).collect(Collectors.toList());
+                String courseId = entry.getKey();
+                List<SubtopicRepository.SearchProjection> matches = entry.getValue();
 
-        return Map.of(
-            "query", query,
-            "results", results
-        );
+                // Build the list of matches for this course
+                List<Map<String, Object>> matchList = matches.stream()
+                    .map(m -> {
+                        Map<String, Object> matchMap = new LinkedHashMap<>();
+                        matchMap.put("type", m.getMatchType());
+                        matchMap.put("topicTitle", m.getTopicTitle());
+                        matchMap.put("subtopicId", m.getSubtopicId());
+                        matchMap.put("subtopicTitle", m.getSubtopicTitle());
+                        matchMap.put("snippet", m.getSnippet());
+                        return matchMap;
+                    })
+                    .toList();
+
+                // Build the Course Object
+                Map<String, Object> courseMap = new LinkedHashMap<>();
+                courseMap.put("courseId", courseId);
+                // We take the course title from the first match (it's the same for all in this group)
+                courseMap.put("courseTitle", matches.get(0).getCourseTitle());
+                courseMap.put("matches", matchList);
+
+                return courseMap;
+            })
+            .toList();
+
+        // 3. Final Response Construction
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("query", query);
+        response.put("results", groupedResults);
+
+        return response;
     }
 }

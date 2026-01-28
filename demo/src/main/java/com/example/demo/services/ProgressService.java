@@ -32,28 +32,28 @@ public class ProgressService {
     @Transactional
     public SubtopicProgress markCompleted(String userEmail, String subtopicId) {
 
-        // 1️⃣ Resolve user from JWT email
+        // user from JWT email
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2️⃣ Fetch subtopic
+        //  Fetch subtopic
         Subtopic subtopic = subtopicRepository.findById(subtopicId)
                 .orElseThrow(() -> new SubtopicNotFoundException(subtopicId));
 
-        // 3️⃣ Walk the chain: Subtopic → Topic → Course
+        //  chain: Subtopic -> Topic -> Course
         Course course = subtopic.getTopic().getCourse();
 
-        // 4️⃣ Check enrollment
+        //  Check enrollment
         if (!enrollmentRepository.existsByUserAndCourse(user, course)) {
             throw new NotEnrolledException();
         }
 
-        // 5️⃣ Idempotency: already completed?
+        // already completed?
         SubtopicProgress progress = progressRepository
                 .findByUserAndSubtopic(user, subtopic)
                 .orElseGet(() -> new SubtopicProgress(user, subtopic));
 
-        // 6️⃣ Mark completed (safe to repeat)
+        // Mark completed 
         if (progress.getCompletedAt() == null) {
             progress.markCompleted();
         }

@@ -22,7 +22,7 @@ public class ProgressController {
     @PostMapping("/{subtopicId}/complete")
     public ResponseEntity<?> completeSubtopic(@PathVariable String subtopicId) {
 
-        // Extract user email from JWT (set by JwtFilter)
+        // Extract user email from JWT 
         String email = (String) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
