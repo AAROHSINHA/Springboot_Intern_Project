@@ -60,3 +60,37 @@ Now for registering, I simply have the user service in the codebase. There we fi
   "expiresIn": 86400
 }
 ```
+
+> ### 4. Course Enrollment
+For course enrollment, we had the enrollments table, which stores 2 key attributes user_id and course_id. When user enters the api for enrolling course, we have the course_id and the user (this is authenticated route, the protected one). So we first check if any such course exist, as you cannot register in a course not present. After that we also check if user is not already registered in the course. This is because we cannot have 2 similar rows in the database too. If all the conditions match, we simply create a enrollment and save to the database!
+If this happens, we recieve the required output
+```
+{
+  "enrolledAt": "2026-01-28T18:27:50.443917800Z",
+  "enrollmentId": 6,
+  "courseId": "physics-101",
+  "courseTitle": "Introduction to Physics"
+}
+```
+**enrollmentId must be noted by the user as it is required in future to check progress**
+
+> ### 5. Progress Tracking - Marking Subtopic as complete
+For progress tracking we have the `subtopic-id` from the route parameter and the `user-email` from the jwt-token. So we simply
+1. Fetch the subtopic from database.
+2. Then we walk up the database from subtopic -> topics -> courses (it's parents)
+3. We do this to get course and check if user is enrolled in course, which contains the subtopic.
+4. If user is enrolled, we check if subtopic is already complete. If not we mark it as complete
+
+> ### 5. View Progress
+For this we simply - 
+1. take in enrollment id (returned from course enrollment) and we also have user id and gmails
+2. We check if user is enrolled or not in this course. simply matching user id from enrollment id in the table.
+3. We do a simple sql query to get the completed subtopics -
+   ```
+      SELECT sp
+        FROM SubtopicProgress sp
+        WHERE sp.user.id = :userId
+          AND sp.completedAt IS NOT NULL
+          AND sp.subtopic.topic.course.id = :courseId
+   ```
+4. Once we get all course, topics and subtopics we simply perform the calculations and return the DTO as response required
