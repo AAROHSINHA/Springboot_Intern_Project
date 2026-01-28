@@ -42,4 +42,12 @@ public class SubtopicProgress {
 
     public Long getId() { return id; }
     public Instant getCompletedAt() { return completedAt; }
+    public Subtopic getSubtopic() {
+    return subtopic;
+}
+
+public User getUser() {
+    return user;
+}
+
 }

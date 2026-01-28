@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
     // Catch everything else =  500 Internal Server Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralError(Exception ex) {
+         ex.printStackTrace();
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error", "An unexpected error occurred");
     }
 
@@ -72,4 +73,13 @@ public ResponseEntity<Object> handleCourseNotFound(CourseNotFoundException ex) {
             ex.getMessage()
         );
     }
+    @ExceptionHandler(UnauthorizedAccessException.class)
+public ResponseEntity<Object> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+    return buildResponse(
+        HttpStatus.FORBIDDEN,
+        "Unauthorized",
+        ex.getMessage()
+    );
+}
+
 }

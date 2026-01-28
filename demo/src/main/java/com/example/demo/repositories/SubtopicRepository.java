@@ -43,4 +43,11 @@ public interface SubtopicRepository extends JpaRepository<Subtopic, String> {
         String getSnippet();
         String getMatchType();
     }
+
+    @Query("""
+        SELECT COUNT(s)
+        FROM Subtopic s
+        WHERE s.topic.course.id = :courseId
+    """)
+    long countByCourseId(@Param("courseId") String courseId);
 }
