@@ -20,10 +20,17 @@ public class SearchService {
             return Map.of("query", "", "results", List.of());
         }
 
-        // 1. Get flat data from DB (Projected Interface)
-        List<SubtopicRepository.SearchProjection> flatResults = subtopicRepository.performFullTextSearch(query.trim());
+        String trimmedQuery = query.trim();
 
-        // 2. Group by Course ID to create the nested structure
+        // 1. Try Baseline Search (ILIKE for partial matches)
+        List<SubtopicRepository.SearchProjection> flatResults = subtopicRepository.performFullTextSearch(trimmedQuery);
+
+        // 2. Fallback to Fuzzy Search ONLY if baseline returns nothing
+        if (flatResults.isEmpty()) {
+            flatResults = subtopicRepository.performFuzzySearch(trimmedQuery);
+        }
+
+        // 3. Group by Course ID to create the nested structure (Preserves Baseline Format)
         List<Map<String, Object>> groupedResults = flatResults.stream()
             .collect(Collectors.groupingBy(
                 SubtopicRepository.SearchProjection::getCourseId,
@@ -51,7 +58,6 @@ public class SearchService {
                 // Build the Course Object
                 Map<String, Object> courseMap = new LinkedHashMap<>();
                 courseMap.put("courseId", courseId);
-                // We take the course title from the first match (it's the same for all in this group)
                 courseMap.put("courseTitle", matches.get(0).getCourseTitle());
                 courseMap.put("matches", matchList);
 
@@ -59,7 +65,7 @@ public class SearchService {
             })
             .toList();
 
-        // 3. Final Response Construction
+        // 4. Final Response Construction
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("query", query);
         response.put("results", groupedResults);

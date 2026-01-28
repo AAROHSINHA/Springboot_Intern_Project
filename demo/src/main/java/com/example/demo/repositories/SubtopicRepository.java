@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 @Repository
 public interface SubtopicRepository extends JpaRepository<Subtopic, String> {
-@Query(value = """
+// baseline search
+    @Query(value = """
         SELECT 
             c.id as courseId, 
             c.title as courseTitle, 
@@ -46,6 +47,25 @@ public interface SubtopicRepository extends JpaRepository<Subtopic, String> {
             OR c.title ILIKE CONCAT('%', :query, '%')
     """, nativeQuery = true)
     List<SearchProjection> performFullTextSearch(@Param("query") String query);
+
+        // fuzzy search
+
+    @Query(value = """
+        SELECT c.id as courseId, c.title as courseTitle, t.title as topicTitle, 
+               s.id as subtopicId, s.title as subtopicTitle,
+               'fuzzy_match' as matchType,
+               CONCAT(LEFT(s.content_markdown, 100), '...') as snippet
+        FROM subtopics s
+        JOIN topics t ON s.topic_id = t.id
+        JOIN courses c ON t.course_id = c.id
+        WHERE s.title % :query 
+           OR s.content_markdown % :query
+           OR t.title % :query
+           OR c.title % :query
+        ORDER BY similarity(s.title, :query) DESC
+        LIMIT 10
+    """, nativeQuery = true)
+    List<SearchProjection> performFuzzySearch(@Param("query") String query);
 
     interface SearchProjection {
         String getCourseId();
