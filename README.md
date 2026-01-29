@@ -1,4 +1,8 @@
 # Springboot_Intern_Project
+
+`LINK -` https://springboot-intern-project.onrender.com/swagger-ui/index.html
+
+
 ## NOTE
 `Note : ` After login route returns response, please copy the jwt token from it and add in authorization field at top right of swagger. Then only wou will be marked login and will be able to access protected (authenticated) routes. 
 => There are 2 types of routes here, public and private. Any one can access public routes. Private routes can be accessed by people who have logged in. We implement private routes by running a security filter chain. View `java\com\example\demo\config\SecurityConfig.java` for complete context!
