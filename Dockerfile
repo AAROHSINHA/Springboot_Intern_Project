@@ -1,13 +1,13 @@
-# ---------- BUILD STAGE ----------
+# ---------- BUILD ----------
 FROM maven:3.9.12-eclipse-temurin-17 AS build
 WORKDIR /app
 
-COPY pom.xml .
-COPY src ./src
+COPY demo/pom.xml .
+COPY demo/src ./src
 
 RUN mvn clean package -DskipTests
 
-# ---------- RUNTIME STAGE ----------
+# ---------- RUN ----------
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
